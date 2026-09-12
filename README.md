@@ -2,6 +2,11 @@
 
 The portfolio served at **https://emanzk.com**.
 
+![The rack at the hero section — wireframe server rack, HUD instruments, and the identity panel drawn on an indicator line](.github/hero.webp)
+
+Scroll drives a camera around a single object. Each section of the CV is a device in the rack,
+and the panel is annotating the hardware rather than replacing it.
+
 **Design rationale — why it looks and behaves the way it does — is in [DESIGN.md](DESIGN.md).**
 
 ```
@@ -23,9 +28,6 @@ eleventy.config.js
 A **Cloudflare Worker** named `emanzk-portfolio`, serving static assets, with `emanzk.com` and
 `www.emanzk.com` attached to it as custom domains.
 
-> Earlier revisions of this file said Cloudflare Pages. That was wrong and is corrected here —
-> the account has no Pages project at all. Checked against the API on 2026-09-11.
-
 **This repository is the source of truth.** `wrangler.jsonc` declares the Worker and both
 custom domains; `.github/workflows/deploy.yml` builds and deploys on every push to `main`,
 using a `CLOUDFLARE_API_TOKEN` repo secret. Two gates run before the deploy step:
@@ -37,17 +39,6 @@ using a `CLOUDFLARE_API_TOKEN` repo secret. Two gates run before the deploy step
 `npm run diagrams` only invokes a headless browser for a diagram it has no SVG for, and every
 SVG is committed, so CI needs no browser — and if one is ever missing the build fails there
 rather than shipping a page that renders diagrams from a CDN.
-
-## Why this is its own repository
-
-It used to live inside `code_vault`, the homelab infrastructure repo, and deploy to S3 from a
-GitHub Action. Both halves of that changed.
-
-**The repository** moved out because a git-connected build system reads the *whole* repository,
-not just the directory it publishes. `code_vault` holds the estate's exact values — addresses,
-MAC addresses, service inventory, and credentials reachable in its history — and is private
-permanently for that reason. Granting a third-party build system read access to all of it in
-order to serve four static files was the wrong trade.
 
 ## `src/` — the rack design
 
@@ -74,12 +65,12 @@ all follow. Adding a post is one markdown file.
 
 ```bash
 npm install
-npm run build      # → dist/
-npm run serve      # http://localhost:8100 with live reload
+npm run serve      # http://localhost:8100, rebuilds on save
+npm run build      # writes dist/ exactly as CI does
 ```
 
 Eleventy renders every panel at build time, so the markup ships complete — the scene boots into
-a page that is already there, and the posts are real, indexable URLs (`/blog/the-ratchet/`)
+a page that is already there, and the posts are real, indexable URLs (`/blog/perimeter-ids-dashboard/`)
 rather than client-side routing.
 
 > Markdown templating is deliberately **off** (`markdownTemplateEngine: false`) so that braces
@@ -95,11 +86,3 @@ rather than client-side routing.
 - **~500 draw calls per frame.** Fine on a desktop, marginal on a mid-range phone. Instancing
   the repeated geometry brings it to roughly 200.
 - **Untested below 1100px**, where the instruments and radial menu currently hide entirely.
-
-## Local preview
-
-```bash
-npm install
-npm run serve     # http://localhost:8100, rebuilds on save
-npm run build     # writes dist/ exactly as CI does
-```
