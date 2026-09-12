@@ -2,8 +2,9 @@
 
 The portfolio served at **https://emanzk.com**.
 
+**Design rationale — why it looks and behaves the way it does — is in [DESIGN.md](DESIGN.md).**
+
 ```
-public/                  <- the site currently live (no build step, uploaded out-of-band)
 src/                     <- the rack design, built by Eleventy
   _data/site.json          identity, skills, experience, credentials, section map
   _includes/               base layout, post layout, page chrome
@@ -11,7 +12,10 @@ src/                     <- the rack design, built by Eleventy
   index.njk                the rack page
   blog/index.njk           the writing index
   blog/posts/*.md          one markdown file per post
-dist/                    <- build output (gitignored)
+dist/                    <- build output (gitignored), what gets deployed
+public/                  <- the previous site, kept for reference only
+.github/workflows/       <- build + deploy on push to main
+wrangler.jsonc
 eleventy.config.js
 ```
 
@@ -23,11 +27,17 @@ A **Cloudflare Worker** named `emanzk-portfolio`, serving static assets, with `e
 > Earlier revisions of this file said Cloudflare Pages. That was wrong and is corrected here —
 > the account has no Pages project at all. Checked against the API on 2026-09-11.
 
-There is **no deploy configuration in this repository**: no `wrangler.toml`, no workflow. The
-Worker was uploaded out-of-band, so nothing here records how live got to be live. The content
-happens to match `public/` byte for byte today, which is luck rather than a guarantee. Adding
-`wrangler.jsonc` and Workers Builds is the first thing to do before this repo can be trusted as
-the source of truth.
+**This repository is the source of truth.** `wrangler.jsonc` declares the Worker and both
+custom domains; `.github/workflows/deploy.yml` builds and deploys on every push to `main`,
+using a `CLOUDFLARE_API_TOKEN` repo secret. Two gates run before the deploy step:
+
+- no page may contain `<pre class="mermaid">` — that means a diagram fell back to client-side
+  rendering because its SVG was never committed
+- no page may reference a file the build did not produce
+
+`npm run diagrams` only invokes a headless browser for a diagram it has no SVG for, and every
+SVG is committed, so CI needs no browser — and if one is ever missing the build fails there
+rather than shipping a page that renders diagrams from a CDN.
 
 ## Why this is its own repository
 
@@ -79,17 +89,15 @@ rather than client-side routing.
 
 ### Not done yet
 
-- **`dist/` is not deployed.** `public/` is still what's live. Cutting over means pointing the
-  Worker at the build — which needs the `wrangler.jsonc` and Workers Builds wiring that this
-  repo still lacks. Until then live is uploaded out-of-band and this repo is not the source of
-  truth.
 - **Debug switches are still in the scripts** — `?p=`, `cam`, `hinge`, `seed`, `nomove`,
-  `hudlog`, `perf`. Development scaffolding; strip before deploying.
+  `hudlog`, `perf`, `bus`, `nopanel`. Development scaffolding.
+- **Reduced-motion is not handled** in the scene — for a site built on motion, that needs a
+  real answer rather than a media query.
 - **~500 draw calls per frame.** Fine on a desktop, marginal on a mid-range phone. Instancing
   the repeated geometry brings it to roughly 200.
 - **Untested below 1100px**, where the instruments and radial menu currently hide entirely.
-- **The committed content is anonymised** — invented employer names and an invented identity,
-  for sharing screenshots. Real values go back in when this is wired up for deployment.
+- **`public/` is dead weight** — the pre-rebuild site, kept only for reference. Nothing serves
+  from it.
 
 ## Local preview of the live site
 
