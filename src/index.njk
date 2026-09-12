@@ -1,0 +1,48 @@
+---
+layout: base.njk
+css: rack.css
+permalink: /index.html
+eleventyComputed:
+  title: "{{ site.identity.first }} {{ site.identity.last }}"
+  description: "{{ site.identity.title }} — {{ site.identity.summary | truncate(140) }}"
+---
+{% include "rackchrome.njk" %}
+<main>
+{%- for sec in site.sections %}
+<section class="ch" data-dev="{{ sec.dev }}" data-shot="{{ sec.shot }}" id="{{ sec.id }}" style="--h:{{ sec.h }}"><div class="sticky"><div class="panel">
+{%- if sec.kind == "hero" %}
+<p class="boot">▸ {{ site.identity.boot | replace("ONLINE", "<b>ONLINE</b>") | safe }}</p><p class="k">{{ sec.k }}</p>
+<h1>{{ site.identity.first }}<br>{{ site.identity.last }}</h1>
+<p class="role">{{ site.identity.title }}{% for r in site.identity.roles %} · {{ r }}{% endfor %}</p>
+<p>{{ site.identity.summary }}</p>
+<p class="meta">{{ site.identity.location }} · {{ site.identity.timezone }}</p>
+<div class="cta">{% for l in site.identity.links %}<a{% if l.primary %} class="solid"{% endif %} href="{{ l.href }}">{{ l.label }}</a>{% endfor %}</div>
+{%- elif sec.kind == "skills" %}
+<p class="k">{{ sec.k }}</p><h2>{{ sec.title }}</h2>
+<div class="groups">{% for g in site.skills %}<div class="grp"><b style="--c:#22d3ee">{{ g.group }}</b><span>{{ g.items | join(" · ") }}</span></div>{% endfor %}</div>
+{%- elif sec.kind == "writing" %}
+<p class="k">{{ sec.k }}</p><h2>{{ sec.title }}</h2>
+{% for post in collections.posts %}<div class="item"><div class="row"><h3>{{ post.data.title }}</h3><span class="when">{{ post.date | isoDate }}</span></div></div>{% endfor %}
+<p class="meta" style="margin-top:12px">Full posts at <a href="/blog/" style="color:var(--hud)">/blog</a></p>
+{%- elif sec.kind == "experience" %}{% set e = site.experience[sec.index] %}
+<p class="k">2U · server {{ sec.index + 1 }} of {{ site.experience | length }}</p>
+<h3>{{ e.role }}</h3><p class="meta">{{ e.company }} · {{ e.period }}</p>
+<ul>{% for b in e.bullets %}<li>{{ b }}</li>{% endfor %}</ul>
+{%- elif sec.kind == "credentials" %}
+<p class="k">{{ sec.k }}</p><h2>{{ sec.title }}</h2>
+{% for c in site.credentials %}<div class="item"><div class="row"><h3>{{ c.title }}</h3><span class="when">{{ c.when }}</span></div><p>{{ c.detail }}</p></div>{% endfor %}
+{%- elif sec.kind == "contact" %}
+<p class="k">{{ sec.k }}</p><h2>{{ sec.title }}</h2>
+<p class="meta">{{ site.identity.email }} · {{ site.identity.location }} · {{ site.identity.timezone }}</p>
+<div class="cta">{% for l in site.identity.links %}{% if not l.primary %}<a href="{{ l.href }}">{{ l.label }}</a>{% endif %}{% endfor %}</div>
+{%- endif %}
+</div></div></section>
+{%- endfor %}
+</main>
+<script>
+window.SITE={{ { "meta": site.meta, "experience": site.experience } | dump | safe }};
+window.POSTS=[{% for p in collections.posts %}{"date":"{{ p.date | isoDate }}","title":{{ p.data.title | dump | safe }}}{% if not loop.last %},{% endif %}{% endfor %}];
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="/assets/hud.js"></script>
+<script src="/assets/rack.js"></script>

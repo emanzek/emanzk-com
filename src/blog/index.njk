@@ -1,0 +1,18 @@
+---
+layout: base.njk
+css: blog.css
+title: Writing
+description: Findings from building and running the estate — the things that were only obvious afterwards.
+---
+{% include "blogchrome.njk" %}
+<main>
+<p class="k">{{ site.meta.rackLabel }} · /blog</p>
+<h1>Writing</h1>
+<p class="lede">{{ description }}</p>
+<ul class="post-list">
+{%- for post in collections.posts %}
+<li><a href="{{ post.url }}"><h2>{{ post.data.title }}</h2><p>{{ post.data.summary }}</p>
+<div class="meta"><span>{{ post.date | isoDate }}</span>{% for t in post.data.topics %}<span class="tag">{{ t }}</span>{% endfor %}</div></a></li>
+{%- endfor %}
+</ul>
+</main>

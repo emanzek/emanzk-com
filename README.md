@@ -3,12 +3,16 @@
 The portfolio served at **https://emanzk.com**.
 
 ```
-public/          <- the site currently live
-  index.html  styles.css  script.js  docs/resume-202510.pdf
-src/             <- the rack design: built, not yet deployed
-  index.html  rack.js  hud.js  content.json  content.js  blog.html  blog.js
-nginx.conf       <- local preview of public/ only
-docker-compose.yml
+public/                  <- the site currently live (no build step, uploaded out-of-band)
+src/                     <- the rack design, built by Eleventy
+  _data/site.json          identity, skills, experience, credentials, section map
+  _includes/               base layout, post layout, page chrome
+  assets/                  rack.css  blog.css  rack.js  hud.js
+  index.njk                the rack page
+  blog/index.njk           the writing index
+  blog/posts/*.md          one markdown file per post
+dist/                    <- build output (gitignored)
+eleventy.config.js
 ```
 
 ## How it is actually hosted
@@ -44,30 +48,41 @@ the roles, the UPS carries credentials, the PDU carries contact. The camera runs
 one angle per section — and the description panel is summoned on an indicator line drawn from
 the device.
 
-**All content lives in `content.json`.** Nothing is duplicated: the server name plates, the
-KVM screen, the writing list and the blog index all read the same arrays. `content.js` loads
-it, builds the panels, then boots the scene.
+### Content
 
-| key | drives |
+Everything on the site comes from data. Nothing is duplicated: the server name plates, the KVM
+screen, the writing list and the blog index all read the same source.
+
+| source | drives |
 |---|---|
-| `meta` | nav brand, 3D rack label, page titles |
-| `identity` | hero, role line, summary, contact, buttons |
-| `skills` | the six groups |
-| `experience` | server plates *and* the role panels |
-| `credentials` | the UPS section |
-| `posts` | writing panel, the KVM screen, the whole blog |
-| `sections` | order, which rack device each maps to, scroll height |
+| `_data/site.json` | brand, rack label, hero, skills, experience (plates *and* panels), credentials, section order |
+| `blog/posts/*.md` | the writing panel, the KVM screen, the blog index, and one page per post |
 
-### Local preview
+Adding a role is one object in `site.json` — the name plate, its typing animation and the panel
+all follow. Adding a post is one markdown file.
+
+### Build
 
 ```bash
-cd src && python3 -m http.server 8100     # http://127.0.0.1:8100/index.html
+npm install
+npm run build      # → dist/
+npm run serve      # http://localhost:8100 with live reload
 ```
+
+Eleventy renders every panel at build time, so the markup ships complete — the scene boots into
+a page that is already there, and the posts are real, indexable URLs (`/blog/the-ratchet/`)
+rather than client-side routing.
+
+> Markdown templating is deliberately **off** (`markdownTemplateEngine: false`) so that braces
+> inside code blocks stay literal. Post permalinks are therefore computed in
+> `blog/posts/posts.11tydata.js` rather than from a `{{ }}` string.
 
 ### Not done yet
 
-- **No build step.** The blog is rendered client-side from `content.json`; 11ty would make the
-  posts real pages with real URLs.
+- **`dist/` is not deployed.** `public/` is still what's live. Cutting over means pointing the
+  Worker at the build — which needs the `wrangler.jsonc` and Workers Builds wiring that this
+  repo still lacks. Until then live is uploaded out-of-band and this repo is not the source of
+  truth.
 - **Debug switches are still in the scripts** — `?p=`, `cam`, `hinge`, `seed`, `nomove`,
   `hudlog`, `perf`. Development scaffolding; strip before deploying.
 - **~500 draw calls per frame.** Fine on a desktop, marginal on a mid-range phone. Instancing

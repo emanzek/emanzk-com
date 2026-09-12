@@ -1,0 +1,263 @@
+{
+ "meta": {
+  "brand": "RACK-01 // EMANZK.COM",
+  "rackLabel": "EMANZK · RACK 01",
+  "domain": "emanzk.com"
+ },
+ "identity": {
+  "first": "Emanzk",
+  "last": "Ravenhall",
+  "title": "Senior IT Infrastructure Engineer",
+  "roles": [
+   "DevOps",
+   "SRE",
+   "Cloud"
+  ],
+  "boot": "SYS.INIT · RACK01 · ONLINE",
+  "summary": "Systems Engineer with over 4 years of hands-on experience in Linux system administration and troubleshooting. Responsible for maintaining infrastructure stability and supporting daily operations across virtualization and cloud environments. Recognized for a practical approach in resolving issues and effective collaboration with cross-functional teams.",
+  "location": "Sepang, Selangor",
+  "timezone": "GMT+8",
+  "email": "emanzk@ravenhall.dev",
+  "links": [
+   {
+    "label": "résumé (PDF)",
+    "href": "#",
+    "primary": true
+   },
+   {
+    "label": "github",
+    "href": "#"
+   },
+   {
+    "label": "linkedin",
+    "href": "#"
+   }
+  ]
+ },
+ "skills": [
+  {
+   "group": "Cloud",
+   "items": [
+    "AWS",
+    "Azure",
+    "Cloudflare"
+   ]
+  },
+  {
+   "group": "Containers & orchestration",
+   "items": [
+    "Kubernetes",
+    "Docker",
+    "Helm",
+    "K3s",
+    "RKE",
+    "OpenShift",
+    "Harvester"
+   ]
+  },
+  {
+   "group": "IaC & automation",
+   "items": [
+    "Terraform",
+    "Ansible",
+    "Python",
+    "Java",
+    "Git"
+   ]
+  },
+  {
+   "group": "CI/CD & GitOps",
+   "items": [
+    "GitLab",
+    "GitHub",
+    "ArgoCD",
+    "Gitea",
+    "Jenkins"
+   ]
+  },
+  {
+   "group": "Observability",
+   "items": [
+    "Prometheus",
+    "Grafana",
+    "Loki"
+   ]
+  },
+  {
+   "group": "Platform, security & network",
+   "items": [
+    "Linux",
+    "Proxmox",
+    "VMware",
+    "OPNsense",
+    "Nginx",
+    "Keycloak",
+    "MinIO",
+    "RedHat",
+    "PostgreSQL"
+   ]
+  }
+ ],
+ "experience": [
+  {
+   "plate": "VYRENTA",
+   "company": "Vyrenta Sdn Bhd",
+   "role": "Senior IT Infrastructure Engineer",
+   "period": "Dec 2024 - Present",
+   "bullets": [
+    "Delivered technical solutions aligned with sales team requirements and SME guidance",
+    "Deployed GitLab Enterprise for CI/CD pipeline with automated .NET application deployments",
+    "Supporting banking platform on legacy OpenShift environment",
+    "Designed GitOps workflow using ArgoCD and Gitea for K3s cluster",
+    "Implemented monitoring solution using Prometheus, Grafana, and Loki for Telco client"
+   ]
+  },
+  {
+   "plate": "KELVARO SYSTEMS",
+   "company": "Kelvaro Systems Pty Ltd",
+   "role": "Cloud System Engineer",
+   "period": "Dec 2023 - Nov 2024",
+   "bullets": [
+    "Maintained cloud resources (AWS and Azure) for hosting, networking, and monitoring",
+    "Developed patching procedure for Red Hat Linux servers for security compliance",
+    "Produced automation scripts (Ansible and Python) for patching procedures",
+    "Collaborated with multiple teams from planning to implementation",
+    "Managed security extended detection and response (XDR) tickets"
+   ]
+  },
+  {
+   "plate": "STRATOVIA",
+   "company": "Stratovia Geospatial Sdn. Bhd.",
+   "role": "Executive DevOps",
+   "period": "June 2022 - Dec 2023",
+   "bullets": [
+    "Provisioned and managed cloud hosting products on AWS infrastructure",
+    "Provided cost optimization analysis for object storage and VMs",
+    "Developed CI/CD pipelines with software department",
+    "Developed automation processes using Terraform and Ansible",
+    "Managed SSL certificates, domains and sites across different providers"
+   ]
+  },
+  {
+   "plate": "ORINTHA",
+   "company": "Orintha Innovation",
+   "role": "Graduate Software Developer (Cloud)",
+   "period": "Dec 2021 - May 2022",
+   "bullets": [
+    "Managed company products hosted on Digital Ocean and AWS",
+    "Involved in deployment process using Docker containerization",
+    "Managed SSL certificates and domains through DNS management",
+    "Collaborated with solution architects on cloud solutions"
+   ]
+  },
+  {
+   "plate": "QUANDRIL",
+   "company": "Quandril Pte Ltd",
+   "role": "Internship Data Engineer",
+   "period": "Sep 2020 - Feb 2021",
+   "bullets": [
+    "Produced data pipeline using AWS Glue, Redshift, Athena and QuickSight",
+    "Collaborated with business team on AWS service integrations",
+    "Supported development team with issue reproduction and verification"
+   ]
+  }
+ ],
+ "credentials": [
+  {
+   "title": "Certified Kubernetes Administrator",
+   "when": "CNCF",
+   "detail": "Cloud Native Computing Foundation"
+  },
+  {
+   "title": "Bachelor of Computer Science",
+   "when": "2017 — 2021",
+   "detail": "Graphics & Multimedia Software Engineering"
+  }
+ ],
+ "sections": [
+  {
+   "id": "hero",
+   "shot": "hero",
+   "dev": 0,
+   "h": "125vh",
+   "kind": "hero",
+   "k": "Ident · Rack 01 · emanzk.com"
+  },
+  {
+   "id": "skills",
+   "shot": "skills",
+   "dev": 1,
+   "h": "300vh",
+   "kind": "skills",
+   "k": "1U · 48-port switch · 32 lit · cabled at the rear",
+   "title": "Skills"
+  },
+  {
+   "id": "writing",
+   "shot": "writing",
+   "dev": 4,
+   "h": "220vh",
+   "kind": "writing",
+   "k": "2U · KVM console",
+   "title": "Writing"
+  },
+  {
+   "id": "exp-0",
+   "shot": "exp0",
+   "dev": 2,
+   "h": "140vh",
+   "kind": "experience",
+   "index": 0
+  },
+  {
+   "id": "exp-1",
+   "shot": "exp1",
+   "dev": 3,
+   "h": "140vh",
+   "kind": "experience",
+   "index": 1
+  },
+  {
+   "id": "exp-2",
+   "shot": "exp2",
+   "dev": 5,
+   "h": "140vh",
+   "kind": "experience",
+   "index": 2
+  },
+  {
+   "id": "exp-3",
+   "shot": "exp3",
+   "dev": 6,
+   "h": "140vh",
+   "kind": "experience",
+   "index": 3
+  },
+  {
+   "id": "exp-4",
+   "shot": "exp4",
+   "dev": 7,
+   "h": "140vh",
+   "kind": "experience",
+   "index": 4
+  },
+  {
+   "id": "certs",
+   "shot": "certs",
+   "dev": 8,
+   "h": "140vh",
+   "kind": "credentials",
+   "k": "2U · UPS · protected",
+   "title": "Certifications & education"
+  },
+  {
+   "id": "contact",
+   "shot": "contact",
+   "dev": 9,
+   "h": "130vh",
+   "kind": "contact",
+   "k": "1U · PDU · mgmt port",
+   "title": "Contact"
+  }
+ ]
+}

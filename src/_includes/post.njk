@@ -1,0 +1,20 @@
+---
+layout: base.njk
+css: blog.css
+---
+{% include "blogchrome.njk" %}
+<main>
+<article>
+<p class="k">{{ site.meta.rackLabel }} · /blog</p>
+<h1>{{ title }}</h1>
+<div class="meta" style="margin-bottom:34px"><span>{{ page.date | isoDate }}</span>{% for t in topics %}<span class="tag">{{ t }}</span>{% endfor %}</div>
+{{ content | safe }}
+</article>
+<hr class="rule">
+<div class="pager">
+{%- set newer = collections.posts | getPreviousCollectionItem %}
+{%- set older = collections.posts | getNextCollectionItem %}
+{% if newer %}<a href="{{ newer.url }}"><span>← newer</span>{{ newer.data.title }}</a>{% else %}<a href="/blog/"><span>←</span>all posts</a>{% endif %}
+{% if older %}<a href="{{ older.url }}" style="text-align:right"><span>older →</span>{{ older.data.title }}</a>{% endif %}
+</div>
+</main>

@@ -1,0 +1,25 @@
+{
+  "name": "emanzk-com",
+  "version": "1.0.0",
+  "description": "emanzk.com \u2014 scroll-driven blueprint portfolio",
+  "scripts": {
+    "build": "eleventy",
+    "serve": "eleventy --serve --port=8100",
+    "clean": "rm -rf dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emanzek/emanzk-com.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/emanzek/emanzk-com/issues"
+  },
+  "homepage": "https://github.com/emanzek/emanzk-com#readme",
+  "devDependencies": {
+    "@11ty/eleventy": "^3.1.6"
+  },
+  "private": true
+}
