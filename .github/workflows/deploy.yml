@@ -1,0 +1,59 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# a second push while one deploy is in flight should supersede it, not race it
+concurrency:
+  group: deploy-worker
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # `npm run diagrams` only shells out to chromium for a diagram it has no SVG
+      # for. Every SVG is committed, so this is a no-op here — and if it isn't, the
+      # runner has no chromium and the build fails loudly, which is what we want.
+      - run: npm run build
+
+      - name: Every diagram must be pre-rendered
+        run: |
+          if grep -rq 'pre class="mermaid"' dist; then
+            echo "::error::a diagram fell back to client-side rendering. Run 'npm run diagrams' locally and commit the SVG."
+            grep -rl 'pre class="mermaid"' dist
+            exit 1
+          fi
+
+      - name: Every referenced asset must exist
+        run: |
+          missing=$(grep -rhoE '(src|href)="/[^"#?]*' dist --include='*.html' \
+            | sed 's/^[^"]*"//' | sort -u \
+            | while read -r p; do
+                f="dist$p"
+                [ -e "$f" ] || [ -e "${f%/}/index.html" ] || echo "$p"
+              done)
+          if [ -n "$missing" ]; then
+            echo "::error::built pages reference files that were not produced:"
+            echo "$missing"
+            exit 1
+          fi
+
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: deploy

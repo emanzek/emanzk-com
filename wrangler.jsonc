@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "emanzk-portfolio",
+  "account_id": "c4ca324c2d1d662f20ade62f72f30eac",   // CI has no account to infer from
   "compatibility_date": "2026-09-08",
 
   // no *.workers.dev hostname — the site is reached only through the two custom domains
