@@ -105,11 +105,12 @@
       "role": "Senior IT Infrastructure Engineer",
       "period": "Dec 2024 - Present",
       "bullets": [
-        "Delivered technical solutions aligned with sales team requirements and SME guidance",
-        "Deployed GitLab Enterprise for CI/CD pipeline with automated .NET application deployments",
-        "Supporting banking platform on legacy OpenShift environment",
-        "Designed GitOps workflow using ArgoCD and Gitea for K3s cluster",
-        "Implemented monitoring solution using Prometheus, Grafana, and Loki for Telco client"
+        "Building an in-house AI-driven security assessment product — vulnerability and post-quantum cryptography analysis on a custom harness over a self-developed agent framework",
+        "Deployed self-hosted GitLab Enterprise with SAST/DAST, and two reusable pipeline templates the client rolls out across projects",
+        "Designed a GitOps workflow on K3s with ArgoCD and Gitea — production deployments now take under 10 minutes",
+        "Consolidated monitoring for a telco client across vSphere, NetApp, NetBackup and NetScaler with Prometheus, Grafana and Loki",
+        "Customised Red Hat SSO against OpenLDAP with a Service Provider Interface in Java, removing manual directory synchronisation",
+        "Supporting a banking platform on a legacy OpenShift environment"
       ]
     },
     {
