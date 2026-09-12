@@ -4,6 +4,7 @@ import fs from "node:fs";
 
 export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/assets": "assets" });
+  eleventyConfig.addPassthroughCopy({ "src/_headers": "_headers" });   // Cloudflare static-assets headers
   eleventyConfig.addFilter("isoDate", d => new Date(d).toISOString().slice(0, 10));
   eleventyConfig.addFilter("bust", f => `${f}?v=${Math.floor(fs.statSync("src/assets/" + f).mtimeMs)}`);
   eleventyConfig.addFilter("pad", (n, w = 2) => String(n).padStart(w, "0")); // nunjucks has no printf-style format

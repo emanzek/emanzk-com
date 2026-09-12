@@ -1,0 +1,18 @@
+---
+layout: base.njk
+css: blog.css
+title: 404
+permalink: /404.html
+eleventyExcludeFromCollections: true
+---
+{% include "blogchrome.njk" %}
+<main>
+<p class="k">{{ site.meta.rackLabel }} · /404</p>
+<h1>No such slot</h1>
+<p class="lede">That path isn't mounted in this rack. It may have been renamed, or it never existed.</p>
+<div class="pager" style="margin-top:38px">
+<a href="/"><span>← rack</span>{{ site.meta.domain }}</a>
+<a class="pager-all" href="/blog/">all posts</a>
+<span class="pager-gap"></span>
+</div>
+</main>

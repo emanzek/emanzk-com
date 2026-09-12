@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "emanzk-portfolio",
+  "compatibility_date": "2026-09-08",
+
+  // no *.workers.dev hostname — the site is reached only through the two custom domains
+  "workers_dev": false,
+  "preview_urls": false,
+
+  // static assets only — no Worker script. `npm run build` writes dist/.
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+
+  // both are already attached to this Worker; declaring them keeps a deploy
+  // from a clean checkout from silently dropping one
+  "routes": [
+    { "pattern": "emanzk.com", "custom_domain": true },
+    { "pattern": "www.emanzk.com", "custom_domain": true }
+  ]
+}
