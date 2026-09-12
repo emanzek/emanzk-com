@@ -97,18 +97,89 @@
     } else if (type === 'switch') {
       let i = 0; GROUPS.forEach(([col, n]) => { for (let k = 0; k < n; k++, i++) { const row = i % 2, c = Math.floor(i / 2); const x = -4.3 + c * .56, yy = row ? -.24 : .16; g.add(oplane(.42, .3, x, yy, Z)); const l = led(col, x, yy + .2, Z, .1, .06, 1); l.userData.group = i; g.add(l); dev.ports.push(l); } });
       dev.leds = [led(0x22d3ee, 4.7, .2, Z), led(0x22d3ee, 4.7, -.15, Z, .16, .1, 1)];
-      // schematic: each port becomes a PCB-style trace — back off the port, a 45° bend, a horizontal run to the bus column, then straight down. Vias at the bends.
-      const traceMat = new THREE.LineBasicMaterial({ color: HUD, transparent: true, opacity: .7 }); dev.rearMats = [[traceMat, .7]];
-      const viaGeo = new THREE.RingGeometry(.07, .11, 16), viaMat = new THREE.MeshBasicMaterial({ color: HUD, transparent: true, opacity: .85, side: THREE.DoubleSide }); dev.rearMats.push([viaMat, .85]);
-      const ZT = -D - .75, BUS = -W / 2 + .45; dev.traces = []; dev.pulses = [];
-      for (i = 0; i < 32; i++) {
-        const x0 = -4.3 + Math.floor(i / 2) * .56, y0 = (i % 2 ? -.24 : .16), lane = i % 4, yRun = -.9 - (i % 8) * .22, yEnd = -3.0 - (i % 7) * .85;
-        const P = [new THREE.Vector3(x0, y0, -D - .05), new THREE.Vector3(x0, y0, ZT), new THREE.Vector3(x0 - Math.abs(y0 - yRun), yRun, ZT), new THREE.Vector3(BUS + lane * .16, yRun, ZT), new THREE.Vector3(BUS + lane * .16, yEnd, ZT)];
-        g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(P), traceMat));
-        [P[2], P[3]].forEach(v => { const via = new THREE.Mesh(viaGeo, viaMat); via.position.copy(v); g.add(via); });
-        const path = new THREE.CurvePath(); for (let k = 1; k < P.length - 1; k++) path.add(new THREE.LineCurve3(P[k], P[k + 1]));
-        const dot = new THREE.Mesh(new THREE.SphereGeometry(.06, 8, 8), new THREE.MeshBasicMaterial({ color: HUD })); dot.userData = { path, t: Math.random(), speed: .18 + Math.random() * .12 }; g.add(dot); dev.pulses.push(dot);
-      }
+      // Six buses leaving the switch, each terminating at a real device: one uplink to the patch
+      // panel, five downlinks to the five servers. Manhattan routing, fixed 45° chamfers, one lane
+      // each. Lanes are ordered by target depth and each turns in at its own device, so none cross.
+      const NET = 0xfbbf24; // network yellow: patch-cable convention, reads apart from the rack's cyan
+      const traceMat = new THREE.LineBasicMaterial({ color: NET, transparent: true, opacity: .85 });
+      const thinMat = new THREE.LineBasicMaterial({ color: NET, transparent: true, opacity: .5 });
+      const markMat = new THREE.MeshBasicMaterial({ color: NET, transparent: true, opacity: .95, side: THREE.DoubleSide });
+      const tagMat = () => new THREE.MeshBasicMaterial({ transparent: true, opacity: .9 });
+      dev.rearMats = [[traceMat, .85], [thinMat, .5], [markMat, .95]];
+      dev.billboards = []; dev.pulses = [];
+      const ZT = -D - .85, CH = .4, BW = .06, LANE = .46, BUSX = -W / 2 + .55;
+
+      // every device's height, so a bus can end where its target actually sits
+      const DEVY = (() => { let c = TOP; const out = []; for (const [t, hh] of LAYOUT) { const h2 = hh * U; if (t !== 'gap') out.push(c - h2 / 2); c -= h2; } return out; })();
+      const myY = DEVY[DEV.length];
+      // the buses belong to the rack, not to the switch — they must not slide out with it
+      const bg = new THREE.Group(); scene.add(bg);   // absolute rack coordinates
+
+      const chamfer = (pts, c) => { const out = [pts[0]];
+        for (let k = 1; k < pts.length - 1; k++) { const q = pts[k], a2 = pts[k - 1], b2 = pts[k + 1];
+          const d1 = [q[0] - a2[0], q[1] - a2[1]], d2 = [b2[0] - q[0], b2[1] - q[1]];
+          const l1 = Math.hypot(d1[0], d1[1]) || 1, l2 = Math.hypot(d2[0], d2[1]) || 1, cc = Math.min(c, l1 / 2, l2 / 2);
+          out.push([q[0] - d1[0] / l1 * cc, q[1] - d1[1] / l1 * cc], [q[0] + d2[0] / l2 * cc, q[1] + d2[1] / l2 * cc]); }
+        out.push(pts[pts.length - 1]); return out; };
+      const offset = (pts, w) => pts.map((q, k) => { let nx = 0, ny = 0;
+        if (k > 0) { const dx = q[0] - pts[k - 1][0], dy = q[1] - pts[k - 1][1], L = Math.hypot(dx, dy) || 1; nx += -dy / L; ny += dx / L; }
+        if (k < pts.length - 1) { const dx = pts[k + 1][0] - q[0], dy = pts[k + 1][1] - q[1], L = Math.hypot(dx, dy) || 1; nx += -dy / L; ny += dx / L; }
+        const L2 = Math.hypot(nx, ny) || 1; return [q[0] + nx / L2 * w, q[1] + ny / L2 * w]; });
+      const poly2 = (pts2, z, mat) => { bg.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts2.map(q => new THREE.Vector3(q[0], q[1], z))), mat)); };
+
+      const marker = (kind, filled, r, x, y, z) => {
+        const n = kind === 0 ? 16 : kind === 1 ? 3 : 4, rot = kind === 1 ? Math.PI / 2 : kind === 2 ? Math.PI / 4 : 0, pv = [];
+        if (filled) { for (let k = 0; k < n; k++) { const a2 = rot + k * 2 * Math.PI / n; pv.push(new THREE.Vector2(Math.cos(a2) * r, Math.sin(a2) * r)); }
+          const m = new THREE.Mesh(new THREE.ShapeGeometry(new THREE.Shape(pv)), markMat); m.position.set(x, y, z); bg.add(m); return; }
+        for (let k = 0; k <= n; k++) { const a2 = rot + k * 2 * Math.PI / n; pv.push(new THREE.Vector3(x + Math.cos(a2) * r, y + Math.sin(a2) * r, z)); }
+        bg.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pv), traceMat)); };
+
+      // both ends of a bus are an 8P8C port: body, latch tab, contact pins
+      const rj45 = (x, y, z, flip) => { const w2 = .3, h2 = .26, tw = .12, th = .1 * (flip ? -1 : 1), hh = h2 / 2 * (flip ? -1 : 1);
+        const pv = [[-w2/2, hh], [w2/2, hh], [w2/2, -hh], [tw/2, -hh], [tw/2, -hh - th], [-tw/2, -hh - th], [-tw/2, -hh], [-w2/2, -hh], [-w2/2, hh]];
+        bg.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pv.map(q => new THREE.Vector3(x + q[0], y + q[1], z))), traceMat));
+        for (let k = 0; k < 4; k++) { const px = x - w2/2 + w2 * (k + 1) / 5;
+          bg.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(
+            [new THREE.Vector3(px, y + hh - .02 * (flip ? -1 : 1), z), new THREE.Vector3(px, y + hh - .11 * (flip ? -1 : 1), z)]), thinMat)); } };
+
+      const pktGeo = kind => { if (kind === 0) return new THREE.CircleGeometry(.032, 12);
+        const n = kind === 1 ? 3 : 4, rot = kind === 1 ? Math.PI / 2 : Math.PI / 4, pv = [];
+        for (let k = 0; k < n; k++) { const a2 = rot + k * 2 * Math.PI / n; pv.push(new THREE.Vector2(Math.cos(a2) * .038, Math.sin(a2) * .038)); }
+        return new THREE.ShapeGeometry(new THREE.Shape(pv)); };
+      const tag = t => tex(gc => { gc.clearRect(0, 0, 128, 64); gc.fillStyle = '#fbbf24';
+        gc.font = '600 44px "JetBrains Mono", ui-monospace, monospace'; gc.textAlign = 'center'; gc.textBaseline = 'middle';
+        gc.fillText(t, 64, 34); }, 128, 64);
+
+      // Structured cabling, dressed the way a rack actually is: each link leaves the patch panel,
+      // runs out to the vertical manager at the side, down it, and back in to the device's NIC.
+      // One conductor per link. Side lanes and exit heights are ordered so nothing ever crosses.
+      const XDEST = 3.28;                   // NIC column: between the grille (ends 3.0) and the rear ports (start 3.6)
+      const yPatch = DEVY[0];
+      const TARGETS = [1, 2, 3, 5, 6, 7];   // the switch's uplink, then the five servers
+      const LINKS = [8, 2, 2, 2, 2, 2];
+      TARGETS.forEach((ti, gi) => {
+        const yT = DEVY[ti], xSrc = -3.6 + gi * 1.2,
+              side = XDEST + .62 + gi * .26,          // deeper links sit further out, so branches pass only over finished ones
+              yTop = yPatch - .35 - (5 - gi) * .22;   // and leave the panel at their own height
+        const path2 = chamfer([[xSrc, yPatch], [xSrc, yTop], [side, yTop], [side, yT], [XDEST, yT]], CH);
+        poly2(path2, ZT, traceMat);                    // one line per link
+        // z-connectors: patch panel rear → cable plane, and cable plane → the device's rear panel
+        bg.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(
+          [new THREE.Vector3(xSrc, yPatch, -D - .05), new THREE.Vector3(xSrc, yPatch, ZT)]), traceMat));
+        bg.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(
+          [new THREE.Vector3(XDEST, yT, ZT), new THREE.Vector3(XDEST, yT, -D - .05)]), traceMat));
+        rj45(xSrc, yPatch, ZT, false);                 // patch panel port
+        rj45(XDEST, yT, -D - .06, false);              // the device's NIC — same position on every device
+        // every port is labelled at its top corner: the shape its packets carry, and the link count
+        marker(gi % 3, gi >= 3, .07, xSrc - .27, yPatch + .27, ZT);
+        const lab = plane(.42, .21, tagMat(), xSrc + .03, yPatch + .27, ZT); lab.material.map = tag('/' + LINKS[gi]);
+        bg.add(lab); dev.rearMats.push([lab.material, .9]); dev.billboards.push(lab);
+        const P3 = [new THREE.Vector3(xSrc, yPatch, -D - .05)].concat(path2.map(q => new THREE.Vector3(q[0], q[1], ZT)))
+          .concat([new THREE.Vector3(XDEST, yT, -D - .06)]);
+        const cp = new THREE.CurvePath(); for (let k = 0; k < P3.length - 1; k++) cp.add(new THREE.LineCurve3(P3[k], P3[k + 1]));
+        const dot = new THREE.Mesh(pktGeo(gi % 3), new THREE.MeshBasicMaterial({ color: NET, transparent: true, side: THREE.DoubleSide }));
+        dot.userData = { path: cp, t: gi / 6, speed: .09 + gi * .01 }; bg.add(dot); dev.pulses.push(dot); dev.billboards.push(dot);
+      });
     } else if (type === 'server') {
       { const si = serverIdx++, host = 'HOST ' + String(si + 1).padStart(2, '0'), lab = dynLabel();
         lab.draw(host, false);
@@ -165,7 +236,7 @@
   // ---- shot list (radius from CZ; front face ~6 nearer, pulled-out server ~9 nearer) ----
   const SHOTS = {
     hero:    [{ a: 18, r: 31, y: 1.2, yl: -2.6 }, { a: 12, r: 28, y: .6, yl: -2.2 }],
-    skills:  [{ a: 6, r: 22, y: .4, yl: 0 }, { a: -70, r: 19, y: 0, yl: -.6 }, { a: -163, r: 19, y: -1.2, yl: -3.2 }],
+    skills:  [{ a: 6, r: 22, y: .4, yl: 0 }, { a: -70, r: 21, y: -1.5, yl: -4 }, { a: -163, r: 34, y: -3.5, yl: -6.5, off: 1.0 }],  // holds the whole run: patch panel at the top down to the lowest NIC
     writing: [{ a: -330, r: 27, y: 4.5, yl: .9, off: 3.0 }, { a: -360, r: 24, y: 7.5, yl: .8, off: 3.4 }], // high enough to see the keyboard on the tray
     exp0:    [{ a: -378, r: 25, y: .5, yl: 0, off: 1.4 }, { a: -381, r: 24.5, y: .4, yl: 0, off: 1.4 }],
     exp1:    [{ a: -338, r: 25, y: .4, yl: 0, off: 1.4 }, { a: -340, r: 24.5, y: .4, yl: 0, off: 1.4 }],
@@ -189,7 +260,7 @@
   const smooth = x => (x = Math.min(1, Math.max(0, x)), x * x * (3 - 2 * x));
   const camQ = new URLSearchParams(location.search).get('cam'); // debug: ?cam=azimuthDeg,radius,y,lookY overrides the shot list
   function shot(p) {
-    if (camQ) { const [a, r, y, yl, lz] = camQ.split(',').map(Number); return { a: a * Math.PI / 180, r, y, yl, off: 2, lz: isNaN(lz) ? null : lz }; }
+    if (camQ) { const [a, r, y, yl, lz, of] = camQ.split(',').map(Number); return { a: a * Math.PI / 180, r, y, yl, off: isNaN(of) ? 2 : of, lz: isNaN(lz) ? null : lz }; }
     if (p <= keys[0].p) return keys[0]; if (p >= keys[keys.length - 1].p) return keys[keys.length - 1];
     let i = 0; while (p > keys[i + 1].p) i++;
     const A = keys[i], B = keys[i + 1], k = smooth((p - A.p) / Math.max(1e-6, B.p - A.p));
@@ -240,6 +311,12 @@
   const WEDGE_OF = [0, 1, 2, 3, 3, 3, 3, 3, 4, 5];
   let last = performance.now(), t = 0, tick = 0;
   const PERF = q.has('perf') ? { frames: 0, js: 0, render: 0 } : null;
+  if (new URLSearchParams(location.search).has('bus')) setTimeout(() => {
+    const sw = DEV.find(d => d.type === 'switch');
+    console.log('BUS ' + JSON.stringify((sw.pulses || []).map((pd, i) => {
+      const pts = pd.userData.path.curves; const last = pts[pts.length - 1].v2, first = pts[0].v1;
+      return { bus: i, srcX: +first.x.toFixed(2), dstX: +last.x.toFixed(2), dstY: +last.y.toFixed(2) }; })));
+  }, 4000);
   if (PERF) setTimeout(() => { const m = performance.memory || {}, inf = renderer.info; console.log('PERF ' + JSON.stringify({ kvm: (() => { const k = DEV.find(d => d.type === 'kvm'); return k ? { F: +k.focus.toFixed(2), slide: +k.g.position.z.toFixed(2), hinge: +k.hinge.rotation.x.toFixed(2), scrOp: +k.screen.material.opacity.toFixed(2), y: k.y } : null; })(), camPos: camera.position.toArray().map(v => +v.toFixed(2)), camNaN: camera.matrixWorldInverse.elements.some(v => Number.isNaN(v)) || camera.projectionMatrix.elements.some(v => Number.isNaN(v)), lookNaN: [look.x, look.y, look.z].some(v => Number.isNaN(v)), shotNow: (() => { const sh = shot(progress); return [+(sh.a * 180 / Math.PI).toFixed(1), +sh.r.toFixed(1), +sh.y.toFixed(1), +sh.yl.toFixed(1), sh.off]; })(), frames: PERF.frames, avgJsMs: +(PERF.js / PERF.frames).toFixed(2), avgRenderMs_swiftshader: +(PERF.render / PERF.frames).toFixed(2), heapUsedMB: +(m.usedJSHeapSize / 1048576).toFixed(1), heapTotalMB: +(m.totalJSHeapSize / 1048576).toFixed(1), drawCalls: inf.render.calls, triangles: inf.render.triangles, lines: inf.render.lines, geometries: inf.memory.geometries, textures: inf.memory.textures, programs: inf.programs.length, domNodes: document.getElementsByTagName('*').length, dpr: renderer.getPixelRatio(), canvas: [renderer.domElement.width, renderer.domElement.height] })); }, 4500);
   let skip = false;
   function frame(now) {
@@ -271,6 +348,7 @@
         if (L.phase === 'del') { L.acc += dt; while (L.acc >= .035 && L.shown.length) { L.acc -= .035; L.shown = L.shown.slice(0, -1); L.dirty = true; } if (!L.shown.length) { L.phase = 'type'; L.acc = 0; } }
         else if (L.phase === 'type') { L.acc += dt; while (L.acc >= .05 && L.shown.length < L.want.length) { L.acc -= .05; L.shown = L.want.slice(0, L.shown.length + 1); L.dirty = true; } if (L.shown.length === L.want.length) { L.phase = 'idle'; L.dirty = true; } }
         if (L.dirty) { L.draw(L.shown, L.phase !== 'idle'); L.dirty = false; } }
+      if (d.billboards) d.billboards.forEach(o => o.quaternion.copy(camera.quaternion));
       if (d.rearMats) d.rearMats.forEach(([m, b]) => { m.opacity = b * rf; });
       if (d.type === 'switch' && d.pulses) d.pulses.forEach(pd => { const u = pd.userData; if (!reduced) u.t = (u.t + dt * u.speed * (.2 + F)) % 1; const pt = u.path.getPointAt(Math.min(u.t, .999)); if (pt) pd.position.copy(pt); /* CurvePath.getPointAt can return null at the seam */ pd.material.opacity = (.25 + F * .75) * rf; pd.material.transparent = true; });
       if (d.type === 'switch') d.ports.forEach((l, j) => { const on = smooth(F * 40 - j), pulse = reduced ? 1 : (.7 + .3 * Math.sin(t * 9 + l.userData.phase)); setLed(l, .1 + on * pulse); });

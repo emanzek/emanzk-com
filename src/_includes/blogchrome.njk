@@ -1,3 +1,3 @@
 <div id="grid"></div><div id="scan"></div>
 <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
-<nav><span class="brand"><i></i><span>{{ site.meta.brand }}</span></span><a href="/">← rack</a><span class="sp"></span><a href="/#writing">writing</a><a href="/#contact">contact</a></nav>
+<nav><span class="brand"><i></i><span>{{ site.meta.brand }}</span></span>{% if page.url == "/blog/" %}<a href="/">← rack</a>{% else %}<a class="back" href="/blog/">← all posts</a>{% endif %}<span class="sp"></span>{% if page.url != "/blog/" %}<a href="/blog/">writing</a>{% endif %}<a href="/">rack</a><a href="/#contact">contact</a></nav>

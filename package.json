@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "emanzk.com \u2014 scroll-driven blueprint portfolio",
   "scripts": {
-    "build": "eleventy",
+    "diagrams": "node tools/render-diagrams.mjs",
+    "build": "npm run diagrams && eleventy",
     "serve": "eleventy --serve --port=8100",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist diagram-build"
   },
   "repository": {
     "type": "git",
@@ -19,7 +20,8 @@
   },
   "homepage": "https://github.com/emanzek/emanzk-com#readme",
   "devDependencies": {
-    "@11ty/eleventy": "^3.1.6"
+    "@11ty/eleventy": "^3.1.6",
+    "markdown-it": "^15.0.2"
   },
   "private": true
 }

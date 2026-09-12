@@ -6,7 +6,60 @@
 {% if description %}<meta property="og:description" content="{{ description }}">{% endif %}
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/{{ css }}">
+<link rel="stylesheet" href="/assets/{{ css | bust }}">
 </head><body>
 {{ content | safe }}
+<script>
+// only pull mermaid in if the page has a diagram
+if (document.querySelector('pre.mermaid')) {
+  const s = document.createElement('script'); s.type = 'module';
+  s.textContent = `import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, securityLevel: 'strict', theme: 'base', themeVariables: {
+      background: '#04101c', primaryColor: '#0d2238', primaryTextColor: '#E6F1FF', primaryBorderColor: '#22D3EE',
+      secondaryColor: '#112a40', tertiaryColor: '#0a1c2e', lineColor: '#22D3EE', textColor: '#D6E6F6',
+      mainBkg: '#0d2238', nodeBorder: '#22D3EE', clusterBkg: 'rgba(34,211,238,.06)', clusterBorder: 'rgba(34,211,238,.3)',
+      edgeLabelBackground: '#04101c', fontFamily: 'JetBrains Mono, ui-monospace, monospace', fontSize: '13px' } });`;
+  document.body.appendChild(s);
+}
+
+const ICON = '<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="5.2" y="5.2" width="8.3" height="8.3" rx="1.4"/><path d="M10.8 2.5H3.9c-.8 0-1.4.6-1.4 1.4v6.9"/></svg>';
+const TICK = '<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8.4l3.4 3.4L13 4.6"/></svg>';
+
+document.querySelectorAll('article .codebox').forEach(box => {
+  const pre = box.querySelector('pre');
+  const b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.title = 'Copy'; b.setAttribute('aria-label', 'Copy code');
+  b.innerHTML = ICON;
+  b.onclick = async () => {
+    try { await navigator.clipboard.writeText(pre.querySelector('code').innerText.replace(/\n$/, '')); }
+    catch { return; }                       // no clipboard on http:// or a denied permission
+    b.innerHTML = TICK; b.classList.add('ok');
+    setTimeout(() => { b.innerHTML = ICON; b.classList.remove('ok'); }, 1400);
+  };
+  box.appendChild(b);
+});
+
+document.querySelectorAll('article .fold').forEach(fold => {
+  const hidden = fold.dataset.lines - 20;
+  if (hidden < 3) return;                   // not worth a control for two lines
+  fold.classList.add('clip');
+  const CHEV = d => `<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="${d}"/></svg>`;
+  const t = document.createElement('button');
+  t.className = 'more'; t.type = 'button';
+  const label = () => {
+    const clipped = fold.classList.contains('clip');
+    t.innerHTML = clipped
+      ? `${CHEV('M3 6l5 5 5-5')}<span>show more</span><em>${hidden} lines</em>`
+      : `${CHEV('M3 10l5-5 5 5')}<span>show less</span>`;
+  };
+  t.onclick = () => {
+    const top = fold.getBoundingClientRect().top;
+    fold.classList.toggle('clip');
+    label();
+    if (fold.classList.contains('clip')) window.scrollBy(0, fold.getBoundingClientRect().top - top);
+  };
+  label();
+  fold.appendChild(t);
+});
+</script>
 </body></html>

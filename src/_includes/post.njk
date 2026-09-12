@@ -7,14 +7,18 @@ css: blog.css
 <article>
 <p class="k">{{ site.meta.rackLabel }} · /blog</p>
 <h1>{{ title }}</h1>
-<div class="meta" style="margin-bottom:34px"><span>{{ page.date | isoDate }}</span>{% for t in topics %}<span class="tag">{{ t }}</span>{% endfor %}</div>
+<div class="meta" style="margin-bottom:26px"><span>{{ page.date | isoDate }}</span>{% for t in topics %}<span class="tag">{{ t }}</span>{% endfor %}</div>
+<div class="callout preface">
+<p><strong>Best-effort writing, model-assisted.</strong> Writing is my nemesis — I don't have the patience to author. You can do the same as me: feed this page to your model and ask it to help you work it out. I've laid everything down; it only needs stitching together.</p>
+</div>
 {{ content | safe }}
 </article>
 <hr class="rule">
 <div class="pager">
 {%- set newer = collections.posts | getPreviousCollectionItem %}
 {%- set older = collections.posts | getNextCollectionItem %}
-{% if newer %}<a href="{{ newer.url }}"><span>← newer</span>{{ newer.data.title }}</a>{% else %}<a href="/blog/"><span>←</span>all posts</a>{% endif %}
-{% if older %}<a href="{{ older.url }}" style="text-align:right"><span>older →</span>{{ older.data.title }}</a>{% endif %}
+{% if newer %}<a href="{{ newer.url }}"><span>← newer</span>{{ newer.data.title }}</a>{% else %}<span class="pager-gap"></span>{% endif %}
+<a class="pager-all" href="/blog/">all posts</a>
+{% if older %}<a href="{{ older.url }}" style="text-align:right"><span>older →</span>{{ older.data.title }}</a>{% else %}<span class="pager-gap"></span>{% endif %}
 </div>
 </main>
