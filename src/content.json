@@ -1,0 +1,313 @@
+{
+ "meta": {
+  "brand": "RACK-01 // EMANZK.COM",
+  "rackLabel": "EMANZK · RACK 01",
+  "domain": "emanzk.com"
+ },
+ "identity": {
+  "first": "Emanzk",
+  "last": "Ravenhall",
+  "title": "Senior IT Infrastructure Engineer",
+  "roles": [
+   "DevOps",
+   "SRE",
+   "Cloud"
+  ],
+  "boot": "SYS.INIT · RACK01 · ONLINE",
+  "summary": "Systems Engineer with over 4 years of hands-on experience in Linux system administration and troubleshooting. Responsible for maintaining infrastructure stability and supporting daily operations across virtualization and cloud environments. Recognized for a practical approach in resolving issues and effective collaboration with cross-functional teams.",
+  "location": "Sepang, Selangor",
+  "timezone": "GMT+8",
+  "email": "emanzk@ravenhall.dev",
+  "links": [
+   {
+    "label": "résumé (PDF)",
+    "href": "#",
+    "primary": true
+   },
+   {
+    "label": "github",
+    "href": "#"
+   },
+   {
+    "label": "linkedin",
+    "href": "#"
+   }
+  ]
+ },
+ "skills": [
+  {
+   "group": "Cloud",
+   "items": [
+    "AWS",
+    "Azure",
+    "Cloudflare"
+   ]
+  },
+  {
+   "group": "Containers & orchestration",
+   "items": [
+    "Kubernetes",
+    "Docker",
+    "Helm",
+    "K3s",
+    "RKE",
+    "OpenShift",
+    "Harvester"
+   ]
+  },
+  {
+   "group": "IaC & automation",
+   "items": [
+    "Terraform",
+    "Ansible",
+    "Python",
+    "Java",
+    "Git"
+   ]
+  },
+  {
+   "group": "CI/CD & GitOps",
+   "items": [
+    "GitLab",
+    "GitHub",
+    "ArgoCD",
+    "Gitea",
+    "Jenkins"
+   ]
+  },
+  {
+   "group": "Observability",
+   "items": [
+    "Prometheus",
+    "Grafana",
+    "Loki"
+   ]
+  },
+  {
+   "group": "Platform, security & network",
+   "items": [
+    "Linux",
+    "Proxmox",
+    "VMware",
+    "OPNsense",
+    "Nginx",
+    "Keycloak",
+    "MinIO",
+    "RedHat",
+    "PostgreSQL"
+   ]
+  }
+ ],
+ "experience": [
+  {
+   "plate": "VYRENTA",
+   "company": "Vyrenta Sdn Bhd",
+   "role": "Senior IT Infrastructure Engineer",
+   "period": "Dec 2024 - Present",
+   "bullets": [
+    "Delivered technical solutions aligned with sales team requirements and SME guidance",
+    "Deployed GitLab Enterprise for CI/CD pipeline with automated .NET application deployments",
+    "Supporting banking platform on legacy OpenShift environment",
+    "Designed GitOps workflow using ArgoCD and Gitea for K3s cluster",
+    "Implemented monitoring solution using Prometheus, Grafana, and Loki for Telco client"
+   ]
+  },
+  {
+   "plate": "KELVARO SYSTEMS",
+   "company": "Kelvaro Systems Pty Ltd",
+   "role": "Cloud System Engineer",
+   "period": "Dec 2023 - Nov 2024",
+   "bullets": [
+    "Maintained cloud resources (AWS and Azure) for hosting, networking, and monitoring",
+    "Developed patching procedure for Red Hat Linux servers for security compliance",
+    "Produced automation scripts (Ansible and Python) for patching procedures",
+    "Collaborated with multiple teams from planning to implementation",
+    "Managed security extended detection and response (XDR) tickets"
+   ]
+  },
+  {
+   "plate": "STRATOVIA",
+   "company": "Stratovia Geospatial Sdn. Bhd.",
+   "role": "Executive DevOps",
+   "period": "June 2022 - Dec 2023",
+   "bullets": [
+    "Provisioned and managed cloud hosting products on AWS infrastructure",
+    "Provided cost optimization analysis for object storage and VMs",
+    "Developed CI/CD pipelines with software department",
+    "Developed automation processes using Terraform and Ansible",
+    "Managed SSL certificates, domains and sites across different providers"
+   ]
+  },
+  {
+   "plate": "ORINTHA",
+   "company": "Orintha Innovation",
+   "role": "Graduate Software Developer (Cloud)",
+   "period": "Dec 2021 - May 2022",
+   "bullets": [
+    "Managed company products hosted on Digital Ocean and AWS",
+    "Involved in deployment process using Docker containerization",
+    "Managed SSL certificates and domains through DNS management",
+    "Collaborated with solution architects on cloud solutions"
+   ]
+  },
+  {
+   "plate": "QUANDRIL",
+   "company": "Quandril Pte Ltd",
+   "role": "Internship Data Engineer",
+   "period": "Sep 2020 - Feb 2021",
+   "bullets": [
+    "Produced data pipeline using AWS Glue, Redshift, Athena and QuickSight",
+    "Collaborated with business team on AWS service integrations",
+    "Supported development team with issue reproduction and verification"
+   ]
+  }
+ ],
+ "credentials": [
+  {
+   "title": "Certified Kubernetes Administrator",
+   "when": "CNCF",
+   "detail": "Cloud Native Computing Foundation"
+  },
+  {
+   "title": "Bachelor of Computer Science",
+   "when": "2017 — 2021",
+   "detail": "Graphics & Multimedia Software Engineering"
+  }
+ ],
+ "posts": [
+  {
+   "slug": "hostsdir-rename",
+   "date": "2026-09-11",
+   "title": "A rename disables nothing inside a hostsdir",
+   "summary": "A .disabled suffix served live DNS records for three weeks. dnsmasq loads every file in a hostsdir regardless of its name.",
+   "tags": [
+    "dns",
+    "dnsmasq",
+    "operations"
+   ],
+   "body": "Retired DNS records kept resolving for three weeks after they were disabled. The file had been renamed with a `.disabled-2026-08-22` suffix, which looked like a disable and read like a disable in the directory listing. It was not one.\n\n## What dnsmasq actually does\n\n`hostsdir=` is a **directory** contract, not a filename contract. dnsmasq loads every file in the directory it points at and parses each one as a hosts file. There is no extension filter, no allow-list, no notion of a disabled name. A file called `custom.list.disabled-2026-08-22` is exactly as live as a file called `custom.list`.\n\n```\nhostsdir=/etc/pihole/hosts\n```\n\nEvery file under that path is loaded. Rename it, date it, prefix it with `OLD_` — it is still served.\n\n## Why it survived review\n\nThe rename produced a directory listing that satisfies a human reading it. Anyone auditing the resolver would see a file marked disabled and move on, which is precisely what happened. The mechanism reported success in the only way anyone was checking.\n\nIt compounded with a second gap: the change had been applied to one resolver and not the other, because the sync tool replicates the hosts array and not the dnsmasq directives. So even a correct fix on one box would have left the other serving the old answers.\n\n## The fix, and the rule\n\nMove the file out of the directory, or delete it. Nothing else disables it.\n\n```bash\nmv /etc/pihole/hosts/custom.list.disabled /etc/pihole/retired/\nsystemctl restart pihole-FTL\n```\n\nThe general form is worth keeping: **a naming convention is not an enforcement mechanism.** If the only thing standing between a config and production is a filename that a human agreed to treat as meaningful, the config is in production.\n\nThe test that would have caught it is the one that queries the resolver rather than reading the directory. `getent hosts` against both resolvers, for a name that should no longer exist, expecting NXDOMAIN. Thirty seconds, and it would have failed in week one."
+  },
+  {
+   "slug": "throttle-at-the-edge",
+   "date": "2026-09-11",
+   "title": "The only throttle is at the edge",
+   "summary": "Why a reverse proxy behind a tunnel cannot rate limit anything, what case-insensitive routing does to a WAF rule, and the test that measured the wrong path three times.",
+   "tags": [
+    "security",
+    "cloudflare",
+    "networking"
+   ],
+   "body": "A media server went onto the public internet with no identity provider in front of it. Cloudflare Access breaks native TV and mobile clients, so the login form itself is exposed and a rate limit is the only thing standing in front of a password field.\n\nThe obvious place to put that limit is the reverse proxy, close to the service. That instinct is wrong here, and the reason generalises.\n\n## A proxy behind a tunnel cannot see who is calling\n\nThe proxy sets its client IP header from the immediate peer. For anything arriving through a tunnel, the immediate peer is the tunnel daemon — every external visitor on earth arrives wearing the same address.\n\n```\nheader_up X-Real-IP {remote_host}\n```\n\nA per-IP limit downstream of that does not protect the login form. It counts the entire internet as one client, and the first burst bans the tunnel — taking down all remote access. The control produces exactly the outage it was installed to prevent.\n\nSo the limit goes at the edge, where the client address is still a real thing.\n\n## Two measurements that changed the rule\n\n**The framework routes case-insensitively.** The app runs on ASP.NET Core, so `/users/authenticatebyname` reaches the same handler as `/Users/AuthenticateByName`. A WAF expression is case-*sensitive*. Matching the documented path exactly produces a rule that looks correct in the dashboard and is defeated by one keystroke. The expression needs to case-fold:\n\n```\nlower(http.request.uri.path) contains \"authenticate\"\n```\n\nThe test that settles it is cheap: request the lowercase path and look for **401 versus 404**. A 401 means the route matched and the credentials were rejected. A 404 means there is no such route.\n\n**The application's own lockout was off.** It exposes a lockout setting, carries a failed-attempt counter, and increments it faithfully. The branch that acts on the count is gated on the setting having a value, and the value was null. The counter was a gauge wired to nothing. Reading the source took two minutes; assuming would have sized the edge rule as defence-in-depth on top of a control that did not exist.\n\n## The verification trap\n\nThe first three attempts to verify the deployed rule showed nothing being blocked. The rule was fine. The test was measuring the wrong path.\n\nSplit-horizon DNS resolves the public hostname, for anyone on the LAN, to the internal proxy. A curl from a workstation reaches the real service, returns a genuine 401, and **never touches the edge** — so every edge control is invisible. The response is authentic, which is what makes it convincing.\n\nLatency gave it away: 23 milliseconds, repeatedly. That is a LAN number, not an internet one.\n\n```bash\ncurl -s -o /dev/null -w '%{remote_ip}\\n' https://example.com/api\n```\n\nPin to the edge with `--resolve`, and use **one** address for the whole run — below Enterprise, rate-limit counters are keyed per data centre, so a burst spread across anycast addresses splits the counter and imitates a rule that does not work.\n\n## What it buys\n\nOn a free plan: five requests per ten seconds, blocked for ten. Roughly fifteen attempts a minute sustained. That is a speed bump, and calling it anything else would be dishonest. The controls that matter more are cheaper — rename the account off its default, and add a second administrator before enabling lockout, because lockout on a single-account server is a denial of service an attacker triggers on purpose."
+  },
+  {
+   "slug": "the-ratchet",
+   "date": "2026-09-10",
+   "title": "The ratchet catches what no probe can",
+   "summary": "A fix can do exactly what it claims, leave the machine perfectly healthy, and still be wrong. Four signals, and the one that earns its place.",
+   "tags": [
+    "automation",
+    "ci",
+    "hardening"
+   ],
+   "body": "An agent proposes a hardening fix. Something has to decide whether it ships. The interesting part of that pipeline is not the agent — it is the gate, and specifically the one signal that no health check can replace.\n\n## Four signals, not one\n\nEach candidate fix gets a disposable clone, and the harness judges the result on four independent questions:\n\n- **target_fixed** — does the rule the fix was written for now pass?\n- **no_regression** — did any rule that was passing before now fail?\n- **probes_pass** — is the machine still reachable, are its services still up?\n- **survived_reboot** — is all of the above still true after a restart?\n\nA fix ships only if all four hold. Three of them are obvious. The second one is the ratchet, and it is the one that earns its place.\n\n## Why probes are not enough\n\nA health probe answers \"is this machine alive and serving.\" That is a necessary question and a shallow one. A remediation can do exactly what it claims, leave the machine perfectly healthy, and still be wrong — because it broke a neighbouring rule that nothing was watching.\n\nThe ratchet compares the **full** rule set before and after. Not the target rule. All of them. It is the difference between \"did my change work\" and \"what else did my change touch\", and only the second question catches collateral damage.\n\n## Three real verdicts\n\n```\naccepted   target fixed · no regression · probes pass · survived reboot\nrejected   probes failed: unreachable — the fix locked out ssh\nrejected   regressed a sibling rule — the ratchet caught it\n```\n\nThe third one is the case for the whole design. That fix **fixed its target**. Probes passed — the machine was up and answering. It survived a reboot. By any reasonable liveness check it was a success, and it was still rejected, because a rule that had been passing before was now failing.\n\nThe second is the case for probes: a hardening rule that tightens remote access can be perfectly correct by the scanner's measure and leave you locked out of the machine. The scanner is delighted. You are on a console cable.\n\n## The generalisation\n\nEvery automated change wants two separate instruments: one that asks **did it work**, and one that asks **did it break anything else**. They fail differently, they are measured differently, and a system that only has the first will ship regressions with a green light on the dashboard.\n\nThe ratchet is cheap — it is a set difference over a scan you were already running. It is also the only signal in the four that would have caught the third verdict, and that fix looked good on everything else."
+  },
+  {
+   "slug": "disposable-machines",
+   "date": "2026-09-09",
+   "title": "Disposable machines and guaranteed teardown",
+   "summary": "__exit__ does not run when the process is killed. Teardown at exit is a hope; teardown at startup is a guarantee.",
+   "tags": [
+    "python",
+    "proxmox",
+    "automation"
+   ],
+   "body": "Every candidate fix runs on a machine that was created for it and is destroyed after it, whatever happens. That is easy to write and surprisingly easy to get wrong.\n\n## The obvious implementation\n\nA context manager. Create the clone on entry, destroy it on exit, and let Python guarantee the teardown:\n\n```python\nwith Clone(template=BASE) as vm:\n    apply_fix(vm)\n    scan(vm)\n```\n\nThis handles the normal path and it handles exceptions, which covers most of what goes wrong. It does not handle the case that actually bit: the process was **SIGKILLed**. Twice, by the OOM killer, while an unrelated desktop process was eating memory.\n\n`__exit__` does not run when the process is killed. `atexit` does not run. `finally` does not run. The clones survived, four gigabytes each, and were discovered later by noticing the storage.\n\n## Teardown at start, not only at end\n\nThe fix is to stop treating cleanup as something that happens at the end of a run, and make it something that happens at the **beginning** of the next one:\n\n```python\ndef reap(vms):\n    for vm in stale_clones(vms):\n        destroy(vm)\n```\n\nExit-time teardown is best-effort — it runs unless the process dies in a way that skips it. Start-time teardown is guaranteed, because the next run always happens. Anything left behind by a previous run is destroyed before this run creates anything.\n\n## The condition that makes it safe\n\nA reaper that deletes machines is a dangerous thing to run automatically, so the predicate matters more than the mechanism. A stale clone must match **both** conditions:\n\n- its ID falls inside the range reserved for this harness\n- its name carries the harness prefix\n\nEither alone is too loose. An ID range can be reused by a human who did not know it was reserved; a name prefix can be typed by anyone. Requiring both means the reaper can only ever destroy something this harness created, and a machine that fails either test is left alone even if it looks like litter.\n\n## The rule\n\nAny process that creates infrastructure should assume it will one day be killed in a way that skips its own cleanup — because eventually it will be. Teardown that only runs on the way out is a hope. Teardown that runs on the way in is a guarantee, and it costs one function call at startup."
+  }
+ ],
+ "sections": [
+  {
+   "id": "hero",
+   "shot": "hero",
+   "dev": 0,
+   "h": "125vh",
+   "kind": "hero",
+   "k": "Ident · Rack 01 · emanzk.com"
+  },
+  {
+   "id": "skills",
+   "shot": "skills",
+   "dev": 1,
+   "h": "300vh",
+   "kind": "skills",
+   "k": "1U · 48-port switch · 32 lit · cabled at the rear",
+   "title": "Skills"
+  },
+  {
+   "id": "writing",
+   "shot": "writing",
+   "dev": 4,
+   "h": "220vh",
+   "kind": "writing",
+   "k": "2U · KVM console",
+   "title": "Writing"
+  },
+  {
+   "id": "exp-0",
+   "shot": "exp0",
+   "dev": 2,
+   "h": "140vh",
+   "kind": "experience",
+   "index": 0
+  },
+  {
+   "id": "exp-1",
+   "shot": "exp1",
+   "dev": 3,
+   "h": "140vh",
+   "kind": "experience",
+   "index": 1
+  },
+  {
+   "id": "exp-2",
+   "shot": "exp2",
+   "dev": 5,
+   "h": "140vh",
+   "kind": "experience",
+   "index": 2
+  },
+  {
+   "id": "exp-3",
+   "shot": "exp3",
+   "dev": 6,
+   "h": "140vh",
+   "kind": "experience",
+   "index": 3
+  },
+  {
+   "id": "exp-4",
+   "shot": "exp4",
+   "dev": 7,
+   "h": "140vh",
+   "kind": "experience",
+   "index": 4
+  },
+  {
+   "id": "certs",
+   "shot": "certs",
+   "dev": 8,
+   "h": "140vh",
+   "kind": "credentials",
+   "k": "2U · UPS · protected",
+   "title": "Certifications & education"
+  },
+  {
+   "id": "contact",
+   "shot": "contact",
+   "dev": 9,
+   "h": "130vh",
+   "kind": "contact",
+   "k": "1U · PDU · mgmt port",
+   "title": "Contact"
+  }
+ ]
+}
