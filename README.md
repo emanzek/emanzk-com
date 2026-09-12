@@ -13,7 +13,6 @@ src/                     <- the rack design, built by Eleventy
   blog/index.njk           the writing index
   blog/posts/*.md          one markdown file per post
 dist/                    <- build output (gitignored), what gets deployed
-public/                  <- the previous site, kept for reference only
 .github/workflows/       <- build + deploy on push to main
 wrangler.jsonc
 eleventy.config.js
@@ -96,11 +95,11 @@ rather than client-side routing.
 - **~500 draw calls per frame.** Fine on a desktop, marginal on a mid-range phone. Instancing
   the repeated geometry brings it to roughly 200.
 - **Untested below 1100px**, where the instruments and radial menu currently hide entirely.
-- **`public/` is dead weight** — the pre-rebuild site, kept only for reference. Nothing serves
-  from it.
 
-## Local preview of the live site
+## Local preview
 
 ```bash
-docker compose up -d    # http://localhost:8080 — serves public/ only
+npm install
+npm run serve     # http://localhost:8100, rebuilds on save
+npm run build     # writes dist/ exactly as CI does
 ```
