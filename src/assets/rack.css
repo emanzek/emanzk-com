@@ -16,7 +16,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:15;display:flex;align-items:cent
 background:linear-gradient(rgba(4,16,28,.92),rgba(4,16,28,0));border-bottom:1px solid var(--line-2)}
 nav .brand{font-weight:700;display:flex;gap:9px;align-items:center;color:var(--fg)}nav .brand i{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok)}
 nav .hud{color:var(--hud);text-shadow:0 0 8px rgba(34,211,238,.45);white-space:pre}
-nav .sp{margin-left:auto}
+nav .sp{margin-left:auto}nav .menu{display:none}nav .links{display:contents} /* wrapper only matters on phone, where it slides open */
 nav a{color:var(--fg-2);text-decoration:none}nav a:hover{color:var(--hud)}:focus-visible{outline:1px solid var(--hud);outline-offset:3px}
 #radial{position:fixed;left:-164px;top:50%;margin-top:-164px;width:328px;height:328px;z-index:15}
 #radial svg{display:block;overflow:visible;pointer-events:none}
@@ -80,8 +80,8 @@ ul{margin:10px 0 0;padding-left:18px;color:var(--fg-2);font-size:15px}li{margin-
 .panel a.post-link:hover .row::after,.panel a.post-link:focus-visible .row::after{opacity:1;transform:translateY(-50%) translateX(0)}.when{font-family:var(--mono);font-size:11.5px;color:var(--fg-3);white-space:nowrap}
 .cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;font-family:var(--mono);font-size:12.5px;letter-spacing:.04em}.cta a{color:var(--fg);text-decoration:none;border:1px solid var(--line);border-radius:2px;padding:9px 14px;transition:box-shadow .2s,border-color .2s}
 .cta a.solid{background:var(--hud);color:var(--bg);border-color:var(--hud);font-weight:700}.cta a:hover{border-color:var(--hud);box-shadow:0 0 14px rgba(34,211,238,.35)}
-@media(max-width:760px){.sticky{padding:0 4vw;align-items:flex-end;justify-content:center;padding-bottom:24px}.groups .grp{grid-template-columns:1fr}nav{gap:14px;overflow-x:auto;padding:12px 16px}nav .hud,.corner{display:none}}
-@media(prefers-reduced-motion:reduce){#scan{display:none}#bar,#radial,#radial a,#leader{transition:none}.log .cur{animation:none}}
+}
+@media(prefers-reduced-motion:reduce){#scan{display:none}#bar,#radial,#radial a,#leader,nav .links,nav .menu,.panel{transition:none}.sticky::after{animation:none}.log .cur{animation:none}}
 
 /* panel faceplate: designation left, section index right */
 .face{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px solid var(--line-2);padding-bottom:9px;margin-bottom:14px}
@@ -134,3 +134,33 @@ ul{margin:10px 0 0;padding-left:18px;color:var(--fg-2);font-size:15px}li{margin-
 /* section subtitle: qualifies the heading without competing with it */
 .panel .sub{margin:-2px 0 12px;font-size:13px;line-height:1.5;color:var(--fg-2);max-width:60ch;border-left:2px solid var(--line);padding-left:11px}
 #hudpanel .sub{font-size:12.5px;margin-bottom:10px}
+
+/* phone: checkpoint tour. Each section is one full-screen snap stop; the camera eases along the shot list between stops and the
+   section's panel pops in once the scroll has settled (rack.js adds .lock). Last in the file on purpose: the short-viewport .listing
+   rules above must not win over it. */
+@media(max-width:760px){
+  html{scroll-snap-type:y mandatory}
+  #scene{opacity:.8}
+  #vig,#bar,#hudpanel,#leader,#radial,.fl,.static,.ghost,nav .hud,nav .sp,.corner{display:none}
+  nav{flex-wrap:wrap;gap:0;padding:0 16px;background:linear-gradient(rgba(4,16,28,.96),rgba(4,16,28,.8));border-bottom:1px solid var(--line-2);backdrop-filter:blur(6px)}
+  nav .brand{flex:1;min-height:52px}
+  nav .menu{display:inline-flex;align-items:center;min-height:44px;padding:0 0 0 16px;background:none;border:0;color:var(--hud);cursor:pointer;filter:drop-shadow(0 0 6px rgba(34,211,238,.7));transition:filter .3s,color .3s}
+  nav.open .menu{color:var(--fg);filter:drop-shadow(0 0 10px var(--hud))}
+  nav .links{display:block;width:100%;max-height:0;opacity:0;overflow:hidden;transition:max-height .35s ease,opacity .3s ease} /* slides open under the brand row */
+  nav.open .links{max-height:260px;opacity:1}
+  nav a{display:flex;width:100%;align-items:center;min-height:44px;border-top:1px solid var(--line-2)}
+  .ch{height:100vh;height:100svh;scroll-snap-align:start;scroll-snap-stop:always}
+  .sticky{position:static;height:100%;align-items:flex-end;justify-content:center;padding:0 12px 34px;visibility:visible}
+  .panel,.panel.wide{width:100%;max-height:58svh;display:flex;flex-direction:column;padding:0;opacity:0;transform:translateY(24px);transition:opacity .35s ease,transform .35s ease} /* ponytail: scroll chains straight out of the panel into the next snap; add overscroll-behavior:contain if that jumps too eagerly */
+  .ch.lock .panel{opacity:1;transform:none}
+  .panel .head{flex:none;padding:16px 18px 0;border-bottom:1px solid var(--line-2)} /* face row + title stay put; only .body scrolls, so the rail sits under the title */
+  .panel .body{min-height:0;overflow:hidden auto;padding:12px 18px 20px;scrollbar-width:thin;scrollbar-color:var(--line) transparent} /* same thin cyan rail the desktop listing uses */
+  .panel .body::-webkit-scrollbar{width:4px}.panel .body::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px;box-shadow:0 0 6px var(--hud)}.panel .body::-webkit-scrollbar-track{background:transparent}
+  .sticky::after{content:"\25B2  swipe up";position:absolute;left:0;right:0;bottom:10px;text-align:center;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--hud);opacity:0;transition:opacity .35s .2s;animation:bob 1.6s ease-in-out infinite}
+  .ch:last-of-type .sticky::after{content:"\2014  end of rack  \2014";animation:none}
+  .ch.lock .sticky::after{opacity:.9}
+  @keyframes bob{50%{transform:translateY(-4px)}}
+  .groups .grp{grid-template-columns:1fr;gap:4px}
+  .listing{max-height:none;overflow:visible}
+}
+}

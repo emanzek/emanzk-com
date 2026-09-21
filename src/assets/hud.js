@@ -1,6 +1,10 @@
 /* emanzk.com HUD instruments: five logs, five charts, floating layout manager. Monochrome cyan. Every feed is synthetic and labelled SIM. */
 (function () {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches, q = new URLSearchParams(location.search);
+  const nav = document.querySelector('nav'), menu = nav.querySelector('.menu'); // phone menu button (display:none on desktop)
+  menu.addEventListener('click', () => menu.setAttribute('aria-expanded', nav.classList.toggle('open')));
+  nav.addEventListener('click', e => { if (e.target.tagName === 'A') { nav.classList.remove('open'); menu.setAttribute('aria-expanded', 'false'); } });
+  if (matchMedia('(max-width:760px)').matches) return; // phone: every instrument is display:none, so skip the timers and the layout manager
   if (q.has('hover')) document.getElementById('radial').classList.add('hover');
   // seeded RNG when ?seed= is given (reproducible screenshots); Math.random otherwise
   let rnd = Math.random; if (q.has('seed')) { let a = (parseInt(q.get('seed'), 10) || 1) >>> 0; rnd = () => { a += 0x6D2B79F5; let t = a; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }

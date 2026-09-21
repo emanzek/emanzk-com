@@ -2,6 +2,7 @@
    Live camera telemetry to the HUD bar, leader line from device to panel. Three r128. */
 (function () {
   const THREE = window.THREE, reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const PHONE = matchMedia('(max-width:760px)'); // phone: checkpoint tour, one snap stop per section (see rack.css)
   const canvas = document.getElementById('scene');
   const DEBUGCAP = new URLSearchParams(location.search).has('p') && !new URLSearchParams(location.search).has('nopreserve');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: DEBUGCAP }); // debug captures only: keeps the last frame readable on throttled frames
@@ -259,6 +260,7 @@
   }
   const smooth = x => (x = Math.min(1, Math.max(0, x)), x * x * (3 - 2 * x));
   const camQ = new URLSearchParams(location.search).get('cam'); // debug: ?cam=azimuthDeg,radius,y,lookY overrides the shot list
+  const PHONE_R = 46, PHONE_DROP = 8; // ponytail: portrait framing knobs. 38° vertical FOV at 390x844 sees only ~18° across, so the rack needs ~40 units of air in front (r-6) to fit the width; the look point drops so the focused device lands in the free band above the panel. Tune on a real phone.
   function shot(p) {
     if (camQ) { const [a, r, y, yl, lz, of] = camQ.split(',').map(Number); return { a: a * Math.PI / 180, r, y, yl, off: isNaN(of) ? 2 : of, lz: isNaN(lz) ? null : lz }; }
     if (p <= keys[0].p) return keys[0]; if (p >= keys[keys.length - 1].p) return keys[keys.length - 1];
@@ -266,13 +268,14 @@
     const A = keys[i], B = keys[i + 1], k = smooth((p - A.p) / Math.max(1e-6, B.p - A.p));
     return { a: A.a + (B.a - A.a) * k, r: A.r + (B.r - A.r) * k, y: A.y + (B.y - A.y) * k, yl: A.yl + (B.yl - A.yl) * k, off: A.off + (B.off - A.off) * k };
   }
-  let progress = 0, target = 0, snap = false;
+  let progress = 0, target = 0, snap = false, still = 0, running = true; // phone: still counts settled frames, the loop parks after enough and wake() restarts it
+  const wake = () => { still = 0; if (!running) { running = true; requestAnimationFrame(frame); } };
   const readScroll = () => { const max = document.documentElement.scrollHeight - innerHeight; target = max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0; };
   let lastScroll = performance.now();
-  addEventListener('scroll', () => { readScroll(); lastScroll = performance.now(); }, { passive: true });
+  addEventListener('scroll', () => { readScroll(); lastScroll = performance.now(); if (PHONE.matches) { sections.forEach(s => s.classList.remove('lock')); wake(); } }, { passive: true });
   const q = new URLSearchParams(location.search), dbg = parseFloat(q.get('p'));
   if (!isNaN(dbg) && q.has('nopanel')) document.getElementById('hudpanel').style.display = 'none';
-  function resize() { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight, false); computeKeys(); readScroll(); if (!isNaN(dbg)) { target = progress = dbg; snap = true; } }
+  function resize() { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight, false); computeKeys(); readScroll(); if (PHONE.matches) wake(); if (!isNaN(dbg)) { target = progress = dbg; snap = true; } }
   if (!isNaN(dbg) && q.has('dump')) setTimeout(() => { const k = DEV[7]; console.log('DUMP p=' + progress.toFixed(3) + ' VH=' + VH.toFixed(4) + ' spans=' + JSON.stringify(DEV.map(d => [+d.pA.toFixed(3), +d.pB.toFixed(3)])) + ' focus=' + JSON.stringify(DEV.map(d => +d.focus.toFixed(2))) + ' hinge=' + (k.hinge ? k.hinge.rotation.x.toFixed(2) : 'n/a') + ' kvmZ=' + k.g.position.z.toFixed(2) + ' cam=' + camera.position.toArray().map(v => v.toFixed(1)).join(',')); }, 2500);
   addEventListener('resize', resize); resize(); addEventListener('load', resize); setTimeout(() => { resize(); if (!isNaN(dbg)) { target = progress = dbg; snap = true; } }, 900);
 
@@ -323,11 +326,11 @@
     // idle throttle: nothing has scrolled for 2s → render every other frame (30fps); scrolling restores 60fps instantly
     if (!reduced && now - lastScroll > 2000 && Math.abs(target - progress) < 1e-4) { skip = !skip; if (skip) { requestAnimationFrame(frame); return; } }
     const dt = Math.min(.05, (now - last) / 1000); last = now; t += dt; tick++; const t0 = PERF ? performance.now() : 0;
-    progress += (target - progress) * .1; const p = progress; bar.style.transform = `scaleX(${p})`;
-    const s = shot(p), drift = reduced ? 0 : 1;
+    progress += (target - progress) * (PHONE.matches ? .2 : .1); const p = progress; // phone: the snap already eases the scroll, so follow it closer bar.style.transform = `scaleX(${p})`;
+    let s = shot(p); const drift = reduced ? 0 : 1; if (PHONE.matches) s = { ...s, r: PHONE_R, yl: s.yl - PHONE_DROP }; // copy: shot() can hand back a keyframe itself
     const a = s.a + Math.sin(t * .23) * .012 * drift, r = s.r + Math.sin(t * .31) * .12 * drift;
     goal.set(Math.sin(a) * r, s.y + Math.sin(t * .27) * .08 * drift, CZ + Math.cos(a) * r);
-    const off = s.off || Math.min(2.4, Math.max(1.2, (r - 6) * .11));
+    const off = PHONE.matches ? 0 : (s.off || Math.min(2.4, Math.max(1.2, (r - 6) * .11))); // phone: panel is below the rack, no lateral room to make
     look.set(Math.cos(a) * off, s.yl, s.lz != null ? s.lz : CZ - Math.sin(a) * off);
     if (snap) { camera.position.copy(goal); snap = false; } else camera.position.lerp(goal, .1);
     camera.lookAt(look);
@@ -361,7 +364,7 @@
     if (best) { const dr = deviceRect(best); if (dr) { const hh = hp.offsetHeight / 2, ct = document.getElementById('charts-top'), cb = document.getElementById('charts-bottom');
       const lo = (ct && ct.offsetWidth ? ct.getBoundingClientRect().bottom + 12 : 70) + hh, hi = (cb && cb.offsetWidth ? cb.getBoundingClientRect().top - 12 : innerHeight - 20) - hh;
       hpTarget = lo <= hi ? Math.min(hi, Math.max(lo, dr.y + dr.h / 2)) : lo; } } // the panel keeps to the band between the chart blocks; if taller than the band it sits below the top block and may cover the bottom charts (it wins by z-index)
-    if (secIdx >= 0 && secIdx !== curSec) summon(secIdx);
+    if (!PHONE.matches && secIdx >= 0 && secIdx !== curSec) summon(secIdx);
     hpY += (hpTarget - hpY) * .06; hp.style.top = hpY.toFixed(1) + 'px';
     // self-correcting: re-check overlaps once a second (cheap, idempotent) and whenever the panel has drifted
     if (curSec >= 0 && window.HUDLAYOUT && (tick % 60 === 0 || (tick % 30 === 0 && Math.abs(hpY - settledY) > 24))) { settledY = hpY; window.HUDLAYOUT.onSection(hp.getBoundingClientRect(), best ? deviceRect(best) : null, rackRect(), rackHull(), curSec); }
@@ -394,6 +397,10 @@
     } else leader.style.opacity = 0;
 
     const t1 = PERF ? performance.now() : 0; renderer.render(scene, camera); if (PERF) { PERF.frames++; PERF.js += t1 - t0; PERF.render += performance.now() - t1; }
+    if (PHONE.matches) { // checkpoint tour: once the snap has settled, lock the section under the viewport (its panel pops in), then park the loop
+      still = Math.abs(target - progress) < 3e-3 ? still + 1 : 0;
+      if (still === 6) sections[Math.min(sections.length - 1, Math.round(scrollY / innerHeight))].classList.add('lock');
+      if (still > 90) { running = false; return; } }
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
