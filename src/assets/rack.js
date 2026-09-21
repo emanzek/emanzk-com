@@ -326,7 +326,7 @@
     // idle throttle: nothing has scrolled for 2s → render every other frame (30fps); scrolling restores 60fps instantly
     if (!reduced && now - lastScroll > 2000 && Math.abs(target - progress) < 1e-4) { skip = !skip; if (skip) { requestAnimationFrame(frame); return; } }
     const dt = Math.min(.05, (now - last) / 1000); last = now; t += dt; tick++; const t0 = PERF ? performance.now() : 0;
-    progress += (target - progress) * (PHONE.matches ? .2 : .1); const p = progress; // phone: the snap already eases the scroll, so follow it closer bar.style.transform = `scaleX(${p})`;
+    progress += (target - progress) * (PHONE.matches ? .2 : .1); const p = progress; bar.style.transform = `scaleX(${p})`; // phone: the snap already eases the scroll, so follow it closer
     let s = shot(p); const drift = reduced ? 0 : 1; if (PHONE.matches) s = { ...s, r: PHONE_R, yl: s.yl - PHONE_DROP }; // copy: shot() can hand back a keyframe itself
     const a = s.a + Math.sin(t * .23) * .012 * drift, r = s.r + Math.sin(t * .31) * .12 * drift;
     goal.set(Math.sin(a) * r, s.y + Math.sin(t * .27) * .08 * drift, CZ + Math.cos(a) * r);
