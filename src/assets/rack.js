@@ -273,6 +273,19 @@
   const readScroll = () => { const max = document.documentElement.scrollHeight - innerHeight; target = max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0; };
   let lastScroll = performance.now();
   addEventListener('scroll', () => { readScroll(); lastScroll = performance.now(); if (PHONE.matches) { sections.forEach(s => s.classList.remove('lock')); wake(); } }, { passive: true });
+  // nav jump: an in-page anchor drops p straight onto the destination, so the shot list between here and there is
+  // never walked — only the camera's last hop is eased. Left to the .1 follow above, a Contact→Skills click scrubs
+  // every keyframe in between and the camera takes the long way round (the azimuths are unwrapped: -322° → -163°).
+  const JUMP_MS = 250; let jumpAt = 0; const jumpFrom = new THREE.Vector3();
+  function navJump() {
+    readScroll(); wake();
+    if (Math.abs(target - progress) < 1e-3) return;   // same section, or the scroll never moved
+    progress = target;                                 // p-derived state (panel, focus, HUD, leader) lands at once
+    if (reduced) { snap = true; return; }
+    jumpFrom.copy(camera.position); jumpAt = performance.now();
+  }
+  addEventListener('hashchange', navJump);             // covers browser back/forward between sections
+  addEventListener('click', e => { if (e.target.closest?.('a[href^="#"]')) requestAnimationFrame(navJump); }, true); // rAF: read scrollY after the anchor's default action lands
   const q = new URLSearchParams(location.search), dbg = parseFloat(q.get('p'));
   if (!isNaN(dbg) && q.has('nopanel')) document.getElementById('hudpanel').style.display = 'none';
   function resize() { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight, false); computeKeys(); readScroll(); if (PHONE.matches) wake(); if (!isNaN(dbg)) { target = progress = dbg; snap = true; } }
@@ -332,7 +345,9 @@
     goal.set(Math.sin(a) * r, s.y + Math.sin(t * .27) * .08 * drift, CZ + Math.cos(a) * r);
     const off = PHONE.matches ? 0 : (s.off || Math.min(2.4, Math.max(1.2, (r - 6) * .11))); // phone: panel is below the rack, no lateral room to make
     look.set(Math.cos(a) * off, s.yl, s.lz != null ? s.lz : CZ - Math.sin(a) * off);
-    if (snap) { camera.position.copy(goal); snap = false; } else camera.position.lerp(goal, .1);
+    if (snap) { camera.position.copy(goal); snap = false; }
+    else if (jumpAt) { const k = smooth((now - jumpAt) / JUMP_MS); camera.position.copy(jumpFrom).lerp(goal, k); if (k >= 1) jumpAt = 0; } // fixed-duration glide, so the hop reads the same however far it travelled
+    else camera.position.lerp(goal, .1);
     camera.lookAt(look);
     aisle.position.set(Math.sin(a) * (r * .45), s.y + 1.6, CZ + Math.cos(a) * (r * .45));
 
