@@ -268,11 +268,11 @@ const boot = () => {
     const A = keys[i], B = keys[i + 1], k = smooth((p - A.p) / Math.max(1e-6, B.p - A.p));
     return { a: A.a + (B.a - A.a) * k, r: A.r + (B.r - A.r) * k, y: A.y + (B.y - A.y) * k, yl: A.yl + (B.yl - A.yl) * k, off: A.off + (B.off - A.off) * k };
   }
-  let progress = 0, target = 0, snap = false, still = 0, running = true; // phone: still counts settled frames, the loop parks after enough and wake() restarts it
+  let progress = 0, target = 0, snap = false, still = 0, running = true, lockedY = -1; // phone: still counts settled frames, the loop parks after enough and wake() restarts it; lockedY is where the locked stop sits
   const wake = () => { still = 0; if (!running) { running = true; requestAnimationFrame(frame); } };
   const readScroll = () => { const max = document.documentElement.scrollHeight - innerHeight; target = max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0; };
   let lastScroll = performance.now();
-  addEventListener('scroll', () => { readScroll(); lastScroll = performance.now(); if (PHONE.matches) { sections.forEach(s => s.classList.remove('lock')); wake(); } }, { passive: true });
+  addEventListener('scroll', () => { readScroll(); lastScroll = performance.now(); if (PHONE.matches) { if (Math.abs(scrollY - lockedY) > 24) { sections.forEach(s => s.classList.remove('lock')); lockedY = -1; } wake(); } }, { passive: true }); // a snap's trailing scroll events don't move the page: unlocking on them made the panel blink
   // nav jump: an in-page anchor drops p straight onto the destination, so the shot list between here and there is
   // never walked — only the camera's last hop is eased. Left to the .1 follow above, a Contact→Skills click scrubs
   // every keyframe in between and the camera takes the long way round (the azimuths are unwrapped: -322° → -163°).
@@ -414,7 +414,7 @@ const boot = () => {
     const t1 = PERF ? performance.now() : 0; renderer.render(scene, camera); if (PERF) { PERF.frames++; PERF.js += t1 - t0; PERF.render += performance.now() - t1; }
     if (PHONE.matches) { // checkpoint tour: once the snap has settled, lock the section under the viewport (its panel pops in), then park the loop
       still = Math.abs(target - progress) < 3e-3 ? still + 1 : 0;
-      if (still === 6) sections[Math.min(sections.length - 1, Math.round(scrollY / innerHeight))].classList.add('lock');
+      if (still === 6) { sections.reduce((a, b) => Math.abs(b.offsetTop - scrollY) < Math.abs(a.offsetTop - scrollY) ? b : a).classList.add('lock'); lockedY = scrollY; } // nearest stop by offset: innerHeight drifts when the toolbar hides
       if (still > 90) { running = false; return; } }
     requestAnimationFrame(frame);
   }
