@@ -10,3 +10,7 @@
 # what unhashed rack.js/hud.js/css need anyway.
 /assets/img/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Pinned library build (r128); a newer three.js gets a new path, so this can sit in cache for a year.
+/assets/vendor/*
+  Cache-Control: public, max-age=31536000, immutable

@@ -52,6 +52,6 @@ eleventyComputed:
 window.SITE={{ { "meta": site.meta, "experience": site.experience } | dump | safe }};
 window.POSTS=[{% for p in collections.posts %}{"date":"{{ p.date | isoDate }}","title":{{ p.data.title | dump | safe }}}{% if not loop.last %},{% endif %}{% endfor %}];
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="/assets/hud.js"></script>
-<script src="/assets/rack.js"></script>
+<script defer src="/assets/vendor/three.min.js"></script><!-- self-hosted: cdnjs set a third-party cookie and blocked first paint -->
+<script defer src="/assets/hud.js"></script>
+<script defer src="/assets/rack.js"></script>

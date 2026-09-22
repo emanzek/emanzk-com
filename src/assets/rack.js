@@ -1,6 +1,6 @@
 /* emanzk.com — CV as a server rack, v3: blueprint / JARVIS HUD. Holographic wireframe rack; the device you're reading materialises.
    Live camera telemetry to the HUD bar, leader line from device to panel. Three r128. */
-(function () {
+const boot = () => {
   const THREE = window.THREE, reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const PHONE = matchMedia('(max-width:760px)'); // phone: checkpoint tour, one snap stop per section (see rack.css)
   const canvas = document.getElementById('scene');
@@ -419,4 +419,6 @@
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-})();
+};
+const start = () => requestAnimationFrame(() => requestAnimationFrame(boot)); // build the scene one frame after the page has painted and its fonts have settled: the text is final before the rack costs anything
+if (document.readyState === 'complete') start(); else addEventListener('load', start);
