@@ -414,7 +414,7 @@ const boot = () => {
     const t1 = PERF ? performance.now() : 0; renderer.render(scene, camera); if (PERF) { PERF.frames++; PERF.js += t1 - t0; PERF.render += performance.now() - t1; }
     if (PHONE.matches) { // checkpoint tour: once the snap has settled, lock the section under the viewport (its panel pops in), then park the loop
       still = Math.abs(target - progress) < 3e-3 ? still + 1 : 0;
-      if (still === 6) { sections.reduce((a, b) => Math.abs(b.offsetTop - scrollY) < Math.abs(a.offsetTop - scrollY) ? b : a).classList.add('lock'); lockedY = scrollY; } // nearest stop by offset: innerHeight drifts when the toolbar hides
+      if (still === 6) { const pick = sections.reduce((a, b) => Math.abs(b.offsetTop - scrollY) < Math.abs(a.offsetTop - scrollY) ? b : a); sections.forEach(s => s.classList.toggle('lock', s === pick)); lockedY = scrollY; } // nearest stop by offset: innerHeight drifts when the toolbar hides. toggle, not add: the 24px guard below can decline to unlock while a drag makes a different section nearest, and two locked panels both render opaque
       if (still > 90) { running = false; return; } }
     requestAnimationFrame(frame);
   }
