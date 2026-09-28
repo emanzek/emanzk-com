@@ -52,6 +52,6 @@ eleventyComputed:
 window.SITE={{ { "meta": site.meta, "experience": site.experience } | dump | safe }};
 window.POSTS=[{% for p in collections.posts %}{"date":"{{ p.date | isoDate }}","title":{{ p.data.title | dump | safe }}}{% if not loop.last %},{% endif %}{% endfor %}];
 </script>
-<script defer src="/assets/vendor/three.min.js"></script><!-- self-hosted: cdnjs set a third-party cookie and blocked first paint -->
+<script defer src="/assets/vendor/three-r128.min.js"></script><!-- self-hosted: cdnjs set a third-party cookie and blocked first paint. Version is in the filename: _headers caches this path immutably for a year, so an upgrade MUST land on a new name -->
 <script defer src="/assets/hud.js"></script>
 <script defer src="/assets/rack.js"></script>
