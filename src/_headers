@@ -11,6 +11,8 @@
 /assets/img/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Pinned library build (r128); a newer three.js gets a new path, so this can sit in cache for a year.
+# Pinned library builds. The version is in the filename, so an upgrade lands on a new path and this
+# can sit in cache for a year. Never overwrite a file under here in place - immutable means even a
+# reload will not revalidate, and a stale three.js against a fresh rack.js is a blank page.
 /assets/vendor/*
   Cache-Control: public, max-age=31536000, immutable

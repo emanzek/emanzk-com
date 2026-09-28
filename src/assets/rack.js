@@ -290,7 +290,7 @@ const boot = () => {
   if (!isNaN(dbg) && q.has('nopanel')) document.getElementById('hudpanel').style.display = 'none';
   function resize() { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight, false); computeKeys(); readScroll(); if (PHONE.matches) wake(); if (!isNaN(dbg)) { target = progress = dbg; snap = true; } }
   if (!isNaN(dbg) && q.has('dump')) setTimeout(() => { const k = DEV[7]; console.log('DUMP p=' + progress.toFixed(3) + ' VH=' + VH.toFixed(4) + ' spans=' + JSON.stringify(DEV.map(d => [+d.pA.toFixed(3), +d.pB.toFixed(3)])) + ' focus=' + JSON.stringify(DEV.map(d => +d.focus.toFixed(2))) + ' hinge=' + (k.hinge ? k.hinge.rotation.x.toFixed(2) : 'n/a') + ' kvmZ=' + k.g.position.z.toFixed(2) + ' cam=' + camera.position.toArray().map(v => v.toFixed(1)).join(',')); }, 2500);
-  addEventListener('resize', resize); resize(); addEventListener('load', resize); setTimeout(() => { resize(); if (!isNaN(dbg)) { target = progress = dbg; snap = true; } }, 900);
+  addEventListener('resize', resize); resize(); setTimeout(() => { resize(); if (!isNaN(dbg)) { target = progress = dbg; snap = true; } }, 900); // boot() already runs on load, so a load listener here could never fire: this timer is the only post-load re-measure, it catches late font metrics
 
   // ---- HUD: telemetry readouts, section rail, leader line ----
   const $ = id => document.getElementById(id);
